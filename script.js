@@ -1,23 +1,35 @@
-/* ====== CONFIG ====== */
-const START_DATE = new Date('2024-12-13T00:00:00Z');   // Your origin date (UTC)
-const CORRECT_PIN = '130206';                          // your PIN
-const INTRO_MS = 2800;                                  // heartbeat time before fade
-const SHOW_MUSIC_BUTTON = false;                        // left here in case you re-add later
-/* ==================== */
+/* ========= CONFIG ========= */
+const START_DATE = new Date('2024-12-13T00:00:00Z'); // origin date (UTC)
+const CORRECT_PIN = '130206';                        // your PIN
+const INTRO_MS    = 2200;                            // heartbeat time before fade
+const SHOW_MUSIC_BUTTON = false;                     // set true if you wire audio
 
-const qs  = (s, r=document) => r.querySelector(s);
-const qsa = (s, r=document) => [...r.querySelectorAll(s)];
+/* ========= UTIL ========= */
+const $  = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 
+let POEMS = [];
+let QUOTES = [];
+
+/* ========= APP BOOT ========= */
 document.addEventListener('DOMContentLoaded', () => {
   initPinGate();
-  qs('#year').textContent = new Date().getFullYear();
+  $('#year').textContent = new Date().getFullYear();
+
+  // preload JSON (safe if gated – we don’t render until unlocked)
+  loadPoems();
+  loadQuotes();
 });
 
-/* ---------- PIN GATE ---------- */
+/* ========= PIN GATE ========= */
 function initPinGate(){
-  const inputs = qsa('#pinRow input');
-  const row = qs('#pinRow');
-  const err = qs('#gateError');
+  const inputs = $$('#pinRow input');
+  const card   = $('.gate-card');
+  const err    = $('#gateError');
+
+  // helpers
+  const value = () => inputs.map(i => i.value.trim()).join('');
+  const clear = () => inputs.forEach(i => i.value = '');
 
   // focus first
   inputs[0].focus();
@@ -25,15 +37,168 @@ function initPinGate(){
   // auto-move on type
   inputs.forEach((inp, idx) => {
     inp.addEventListener('input', () => {
-      inp.value = inp.value.replace(/\D/g, '').slice(0,1);
-      if(inp.value && idx < inputs.length-1) inputs[idx+1].focus();
-      if(getPinValue().length === 6) verifyPin();
+      inp.value = (inp.value || '').replace(/\D/g,'').slice(0,1);
+      if (inp.value && idx < inputs.length - 1) inputs[idx+1].focus();
+      if (value().length === 6) verifyPin();
     });
 
     // backspace to previous
     inp.addEventListener('keydown', (e) => {
-      if((e.key === 'Backspace' || e.key === 'Delete') && !inp.value && idx>0){
+      if (e.key === 'Backspace' && !inp.value && idx > 0) {
         inputs[idx-1].focus();
+      }
+      if (e.key === 'Enter' && value().length === 6) {
+        e.preventDefault(); verifyPin();
+      }
+    });
+  });
+
+  // paste 6 digits anywhere
+  card.addEventListener('paste', (e) => {
+    const t = (e.clipboardData || window.clipboardData).getData('text') || '';
+    const digits = t.replace(/\D/g,'').slice(0,6);
+    if (!digits) return;
+    e.preventDefault();
+    digits.split('').forEach((d,i) => { if (inputs[i]) inputs[i].value = d; });
+    const last = Math.min(digits.length, 6) - 1;
+    if (last >= 0) inputs[last].focus();
+    if (digits.length === 6) verifyPin();
+  });
+
+  function verifyPin(){
+    if (value() === CORRECT_PIN) {
+      err.textContent = '';
+      openApp();
+    } else {
+      err.textContent = 'That PIN isn’t right. Try again.';
+      card.classList.remove('shake');
+      void card.offsetWidth; // restart animation
+      card.classList.add('shake');
+      clear(); inputs[0].focus();
+    }
+  }
+}
+
+/* ========= INTRO + MAIN ========= */
+function openApp(){
+  // hide gate, run intro, then show app
+  $('#gate').classList.add('hidden');
+  const intro = $('#intro');
+  intro.classList.remove('hidden');
+  setTimeout(() => {
+    intro.classList.add('hidden');
+    bootMain();
+  }, INTRO_MS);
+}
+
+function bootMain(){
+  // show main UI
+  $('#app').classList.remove('hidden');
+
+  if (!SHOW_MUSIC_BUTTON) $('#musicBtn').classList.add('hidden');
+
+  // start timer
+  renderTimer();
+  setInterval(renderTimer, 1000);
+
+  // choose poem + quote
+  pickAndRenderPoem();
+  pickAndRenderQuote();
+}
+
+/* ========= TIMER ========= */
+function renderTimer(){
+  const now = new Date();
+  let diff = Math.floor((now - START_DATE) / 1000);
+  if (diff < 0) diff = 0;
+
+  const days = Math.floor(diff / 86400); diff -= days * 86400;
+  const hours = Math.floor(diff / 3600); diff -= hours * 3600;
+  const mins = Math.floor(diff / 60);
+  const secs = diff - mins * 60;
+
+  $('#days').textContent = String(days);
+  $('#hours').textContent = String(hours).padStart(2,'0');
+  $('#minutes').textContent = String(mins).padStart(2,'0');
+  $('#seconds').textContent = String(secs).padStart(2,'0');
+}
+
+/* ========= POEMS ========= */
+async function loadPoems(){
+  try{
+    const res = await fetch('poems.json', {cache:'no-store'});
+    POEMS = await res.json();
+  }catch{
+    // small fallback set
+    POEMS = [
+      {
+        by: "Noor",
+        title: "Tonight the sky leans close",
+        note: "Inspired by Ghalib",
+        lines: [
+          "Tonight the sky leans close,",
+          "the minutes crowd like petals.",
+          "I count them one by one",
+          "until they spell you."
+        ]
+      },
+      {
+        by: "Eesa",
+        title: "If distance is a winter",
+        note: "For my princess",
+        lines: [
+          "If distance is a winter, your voice is the wool.",
+          "It keeps the questions gentle,",
+          "the night my star unafraid."
+        ]
+      }
+    ];
+  }
+}
+
+function pickAndRenderPoem(){
+  if (!POEMS.length) return;
+  // deterministic by day, so it changes daily and rarely repeats
+  const idx = Math.abs(Math.floor(Date.now()/86400000)) % POEMS.length;
+  renderPoem(POEMS[idx]);
+}
+
+function renderPoem(p){
+  $('#poemBy').textContent = p.by || '—';
+  $('#poemTitle').textContent = p.title || '';
+  $('#poemDate').textContent = new Date().toLocaleDateString(undefined, {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
+  $('#poemNote').textContent = p.note ? `“${p.note}”` : '';
+
+  const holder = $('#poem');
+  holder.innerHTML = '';
+  p.lines.forEach((ln, i) => {
+    const d = document.createElement('div');
+    d.className = 'line';
+    d.style.animationDelay = `${i * 380}ms`;
+    d.textContent = ln;
+    holder.appendChild(d);
+  });
+}
+
+/* ========= QUOTES ========= */
+async function loadQuotes(){
+  try{
+    const res = await fetch('quotes.json', {cache:'no-store'});
+    QUOTES = await res.json();
+  }catch{
+    QUOTES = [
+      { text: "I saw that you were perfect, and so I loved you. Then I saw that you were not perfect and I loved you even more.", by: "Angelita Lim" },
+      { text: "Whatever our souls are made of, his and mine are the same.", by: "Emily Brontë" }
+    ];
+  }
+}
+
+function pickAndRenderQuote(){
+  if (!QUOTES.length) return;
+  const idx = Math.abs(Math.floor(Date.now()/3600000)) % QUOTES.length; // rotate hourly
+  const q = QUOTES[idx];
+  $('#quote').textContent = q.by ? `“${q.text}” — ${q.by}` : `“${q.text}”`;
+}
       }
       if(e.key === 'Enter' && getPinValue().length === 6) verifyPin();
     });
