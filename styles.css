@@ -1,39 +1,129 @@
-/* ---------- PIN GATE (hardened) ---------- */
+/* ===== Theme tokens ===== */
 :root{
-  --pin-size: 56px;   /* box size on desktop */
-  --pin-gap: 12px;
+  --bg:#0f0f11; --bg2:#141417;
+  --red:#c92a2a; --rose:#7a2d2d;
+  --card:#1b1b20; --muted:#a7a7b0;
+  --text:#f6f6f6; --soft:#ffffff12;
+  --glow: drop-shadow(0 0 24px rgba(201,42,42,.35));
+  --pin-size:56px; --pin-gap:12px;
 }
+
+*{box-sizing:border-box}
+html,body{height:100%}
+body{
+  margin:0; color:var(--text);
+  background:
+    radial-gradient(60% 45% at 50% 10%, #240b0b 0%, transparent 65%),
+    radial-gradient(35% 35% at 50% 55%, #1a0b0b 0%, transparent 60%),
+    linear-gradient(135deg, #16161a, #0d0d0f);
+  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
+  overflow-x:hidden;
+}
+
+.hidden{display:none !important}
+
+/* ===== PIN gate ===== */
+.gate{
+  position:fixed; inset:0; display:grid; place-items:center;
+  background: radial-gradient(700px 700px at 50% 65%, #2a0f0f 0%, #0000 60%), var(--bg);
+  padding:24px;
+}
+.gate-card{
+  width:min(720px, 92vw);
+  background:linear-gradient(180deg, #1a1a1f 0, #111115 100%);
+  border:1px solid var(--soft); border-radius:18px;
+  padding:36px 28px 28px; box-shadow:0 8px 30px #0008; filter:var(--glow);
+}
+.gate-card h1{margin:0 0 8px; font-size:clamp(24px,3.5vw,36px)}
+.gate-sub{margin:0 0 22px; color:var(--muted)}
+.hint{margin:.75rem 0 0; color:var(--muted); font-size:.95rem}
+.gate-error{min-height:1.25rem; color:#ff8f8f; margin-top:.35rem}
 
 .pin-row{
-  display: grid;
-  grid-template-columns: repeat(6, var(--pin-size));
-  gap: var(--pin-gap);
-  justify-content: center;
+  display:grid; grid-template-columns:repeat(6,var(--pin-size));
+  gap:var(--pin-gap); justify-content:center;
 }
-
 .pin-row input{
-  /* lock the size no matter what global CSS says */
-  width: var(--pin-size) !important;
-  height: var(--pin-size) !important;
-  flex: 0 0 var(--pin-size) !important;
-
-  padding: 0;
-  text-align: center;
-  font-size: 26px;
-  letter-spacing: 1px;
-
-  border-radius: 12px;
-  border: 1px solid rgba(255,255,255,.15);
-  background: #0f1219;
-  color: var(--text);
-
-  appearance: none;
-  -webkit-appearance: none;
-  -moz-appearance: textfield;
-  outline: none;
-  transition: border-color .2s, transform .1s;
+  width:var(--pin-size); height:var(--pin-size); flex:0 0 var(--pin-size);
+  padding:0; text-align:center; font-size:26px; letter-spacing:1px;
+  border-radius:12px; border:1px solid rgba(255,255,255,.15);
+  background:#0f1219; color:var(--text);
+  appearance:none; -webkit-appearance:none; -moz-appearance:textfield;
+  outline:none; transition:border-color .2s, transform .1s;
+}
+.pin-row input:focus{ border-color:#6e9cff; transform:translateY(-1px) }
+.shake{ animation:shake .35s linear }
+@keyframes shake{
+  10%,90%{transform:translateX(-2px)}
+  20%,80%{transform:translateX(4px)}
+  30%,50%,70%{transform:translateX(-6px)}
+  40%,60%{transform:translateX(6px)}
 }
 
+/* ===== Intro ===== */
+.intro{ position:fixed; inset:0; display:grid; place-items:center; background:var(--bg); }
+.intro-inner{ position:relative; width:min(520px,90vw); aspect-ratio:1/1; }
+.heartbeat{
+  position:absolute; inset:0; border-radius:50%;
+  background:radial-gradient(circle at 50% 50%, #6d1515 0, #2a0a0a 35%, #0000 60%);
+  filter:var(--glow); animation:beat 1.6s ease-in-out 3;
+}
+@keyframes beat{
+  0%{ transform:scale(1); opacity:.9 }
+  25%{ transform:scale(1.06) }
+  50%{ transform:scale(1); opacity:.85 }
+  75%{ transform:scale(1.08) }
+  100%{ transform:scale(1); opacity:0 }
+}
+.intro-title{
+  position:absolute; left:0; right:0; bottom:6%;
+  text-align:center; font-family:"Cormorant Garamond", serif;
+  font-size:clamp(26px,6vw,42px); letter-spacing:.02em;
+  text-shadow:0 2px 18px #000a;
+  animation:fadeUp .9s ease forwards; animation-delay:.5s;
+  opacity:0;
+}
+@keyframes fadeUp{
+  from{ transform:translateY(12px); opacity:0 }
+  to{ transform:translateY(0); opacity:1 }
+}
+
+/* ===== Main ===== */
+.topbar{
+  display:flex; align-items:center; justify-content:space-between;
+  padding:20px clamp(16px,4vw,32px); color:var(--muted);
+}
+.brand{ font-weight:600; letter-spacing:.12em }
+.since strong{ color:#fff; font-weight:600 }
+
+.timer-card, .poem-card, .quote-card{
+  width:min(940px,92vw); margin: 6px auto 20px;
+  background:linear-gradient(180deg, #1a1a1f 0, #111115 100%);
+  border:1px solid var(--soft); border-radius:18px; padding:22px;
+  box-shadow:0 6px 24px #0007;
+}
+.timer-card h2{ margin:0 0 14px; font-weight:600 }
+.timer-grid{
+  display:grid; grid-template-columns:repeat(4,1fr); gap:14px;
+}
+.tbox{ background:#0f1219; border:1px solid var(--soft); border-radius:14px; padding:18px 10px; text-align:center }
+.tnum{ font-size: clamp(24px, 6vw, 42px); font-weight:700 }
+.tlabel{ color:var(--muted); text-transform:uppercase; letter-spacing:.18em; font-size:.75rem }
+
+.poem-title{ font-family:"Cormorant Garamond", serif; font-size:clamp(22px,3.5vw,28px); margin:2px 0 10px }
+.poem{ font-family:"Cormorant Garamond", serif; font-size:clamp(18px,3.2vw,24px); line-height:1.55 }
+.poem .line{ opacity:0; animation:whisper .7s ease forwards }
+@keyframes whisper{ from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:translateY(0)} }
+.poem-meta{ color:var(--muted); margin-bottom:6px }
+.poem-note{ color:var(--muted); margin-top:12px; font-style:italic }
+
+.quote{ font-family: "Cormorant Garamond", serif; font-size:clamp(18px,3vw,22px) }
+.foot{ text-align:center; color:var(--muted); padding:24px }
+
+.ghost{ background:transparent; color:#cbd1ff; border:1px solid #2b2f55; border-radius:12px; padding:8px 12px }
+
+/* Mobile tune */
+@media (max-width: 520px){ :root{ --pin-size:46px; --pin-gap:8px } }
 .pin-row input:focus{
   border-color: #6e9cff;
   transform: translateY(-1px);
