@@ -1,0 +1,27 @@
+body {
+  margin: 0;
+  font-family: 'Merriweather', serif;
+  background: linear-gradient(135deg, #1c1c1c, #3a0000);
+  color: gold;
+  text-align: center;
+  overflow: hidden;
+}
+.screen { display: none; height: 100vh; width: 100vw; position: absolute; top:0; left:0; }
+.screen.active { display: flex; align-items:center; justify-content:center; flex-direction:column; }
+.pin-container { background: rgba(0,0,0,0.6); padding:20px; border-radius:15px; }
+.pin-inputs input { width:40px; height:40px; margin:5px; font-size:24px; text-align:center; border:none; border-radius:8px; }
+.heartbeat { animation: heartbeat 1.5s infinite; }
+@keyframes heartbeat {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+.overlay-text {
+  position: absolute; top: 50%; left:50%; transform:translate(-50%, -50%);
+  font-family:'Great Vibes', cursive; font-size:48px; color:gold; animation: fadeInOut 3s forwards;
+}
+@keyframes fadeInOut {
+  0% { opacity:0; }
+  20% { opacity:1; }
+  80% { opacity:1; }
+  100% { opacity:0; }
+}
