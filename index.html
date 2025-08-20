@@ -1,40 +1,99 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>For My Princess</title>
-  <link rel="stylesheet" href="styles.css">
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lora:wght@700&family=Merriweather:ital,wght@1,400&display=swap" rel="stylesheet">
+
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css" />
+  <script defer src="script.js"></script>
 </head>
 <body>
-  <div id="pin-screen" class="screen active">
-    <div class="pin-container heartbeat">
-      <h2>Enter PIN</h2>
-      <div class="pin-inputs">
-        <input type="password" maxlength="1">
-        <input type="password" maxlength="1">
-        <input type="password" maxlength="1">
-        <input type="password" maxlength="1">
-        <input type="password" maxlength="1">
-        <input type="password" maxlength="1">
+  <!-- PIN GATE -->
+  <section id="gate" class="gate">
+    <div class="gate-card">
+      <h1>For My Princess</h1>
+      <p class="gate-sub">Enter your 6-digit private PIN</p>
+
+      <div class="pin-row" id="pinRow">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
       </div>
+
+      <p class="gate-tip">Tip: it auto-moves. Tap any box to edit.</p>
+      <p id="gateError" class="gate-error" aria-live="polite"></p>
+    </div>
+  </section>
+
+  <!-- INTRO (heartbeat → fade) -->
+  <div id="intro" class="intro hidden" aria-hidden="true">
+    <div class="intro-inner">
+      <div class="heartbeat"></div>
+      <div class="intro-title">For My Princess</div>
     </div>
   </div>
 
-  <div id="intro-screen" class="screen">
-    <video id="intro-video" autoplay muted>
-      <source src="media/intro.mp4" type="video/mp4">
-    </video>
-    <div class="overlay-text">For my Princess ❤️</div>
-  </div>
+  <!-- MAIN APP -->
+  <main id="app" class="hidden">
+    <header class="topbar">
+      <div class="brand">FOR US</div>
+      <div class="since">
+        <span>Since</span>
+        <strong>13 December 2024</strong>
+      </div>
+      <!-- Toggle this button by setting SHOW_MUSIC_BUTTON in script.js -->
+      <button id="musicBtn" class="ghost hidden">Play Music</button>
+    </header>
 
-  <div id="main-screen" class="screen">
-    <div class="timer"></div>
-    <div class="poem"></div>
-    <div class="quote"></div>
-  </div>
+    <section class="timer-card">
+      <h2>…and counting</h2>
+      <div class="timer-grid">
+        <div class="tbox">
+          <div class="tnum" id="days">--</div>
+          <div class="tlabel">Days</div>
+        </div>
+        <div class="tbox">
+          <div class="tnum" id="hours">--</div>
+          <div class="tlabel">Hours</div>
+        </div>
+        <div class="tbox">
+          <div class="tnum" id="minutes">--</div>
+          <div class="tlabel">Minutes</div>
+        </div>
+        <div class="tbox">
+          <div class="tnum" id="seconds">--</div>
+          <div class="tlabel">Seconds</div>
+        </div>
+      </div>
+    </section>
 
-  <script src="script.js"></script>
+    <section class="poem-card">
+      <div class="meta-line">
+        <span id="todayMeta">—</span>
+        <span id="nickname" class="nick"></span>
+      </div>
+
+      <h3 class="section-title">Today’s Poem</h3>
+
+      <!-- The poem lines get injected here with whisper animation -->
+      <div id="poem" class="poem"></div>
+
+      <div id="quote" class="quote"></div>
+    </section>
+
+    <footer class="foot">
+      © <span id="year"></span> For My Princess
+    </footer>
+  </main>
+
+  <!-- (Optional) Audio — you will add your own MP3 file later -->
+  <audio id="bgm" preload="none"></audio>
 </body>
 </html>
