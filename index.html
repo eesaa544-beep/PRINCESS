@@ -2,38 +2,98 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>For My Princess</title>
 
-  <!-- Google Fonts: calligraphy + clean serif/sans -->
-  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="styles.css" />
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- IMPORTANT: defer so JS can find the DOM -->
+  <link rel="stylesheet" href="styles.css" />
   <script defer src="script.js"></script>
 </head>
 <body>
-  <!-- PIN GATE -->
-  <section id="gate" class="gate">
-    <div class="gate-card">
-      <h1>For My Princess</h1>
+
+  <!-- ===== PIN GATE ===== -->
+  <section id="gate" class="gate" aria-label="Private gate">
+    <div class="gate-card" role="dialog" aria-modal="true" aria-labelledby="gateTitle">
+      <h1 id="gateTitle">For My Princess</h1>
       <p class="gate-sub">Enter your 6-digit private PIN</p>
 
-      <div id="pinRow" class="pin-row" aria-label="6 digit PIN">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5">
-        <input type="password" inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6">
+      <div class="pin-row" id="pinRow">
+        <input inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 1">
+        <input inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 2">
+        <input inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 3">
+        <input inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 4">
+        <input inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 5">
+        <input inputmode="numeric" pattern="[0-9]*" maxlength="1" aria-label="Digit 6">
       </div>
 
-      <p class="tip">Tip: it auto-moves. Paste works too.</p>
+      <p class="hint">Tip: it auto-moves. Paste works too.</p>
       <p id="gateError" class="gate-error" aria-live="polite"></p>
     </div>
   </section>
 
-  <!-- INTRO (heartbeat → fade) -->
+  <!-- ===== INTRO (heartbeat -> fade) ===== -->
+  <section id="intro" class="intro hidden" aria-hidden="true">
+    <div class="intro-inner">
+      <div class="heartbeat"></div>
+      <div class="intro-title">For My Princess</div>
+    </div>
+  </section>
+
+  <!-- ===== MAIN APP ===== -->
+  <main id="app" class="hidden" aria-live="polite">
+    <header class="topbar">
+      <div class="brand">FOR US</div>
+      <div class="since">
+        <span>Since</span> <strong>13 December 2024</strong>
+      </div>
+      <button id="musicBtn" class="ghost hidden">Play Music</button>
+    </header>
+
+    <section class="timer-card">
+      <h2>…and counting</h2>
+      <div class="timer-grid">
+        <div class="tbox">
+          <div class="tnum" id="days">--</div>
+          <div class="tlabel">days</div>
+        </div>
+        <div class="tbox">
+          <div class="tnum" id="hours">--</div>
+          <div class="tlabel">hours</div>
+        </div>
+        <div class="tbox">
+          <div class="tnum" id="minutes">--</div>
+          <div class="tlabel">minutes</div>
+        </div>
+        <div class="tbox">
+          <div class="tnum" id="seconds">--</div>
+          <div class="tlabel">seconds</div>
+        </div>
+      </div>
+    </section>
+
+    <section class="poem-card">
+      <div class="poem-meta">
+        <span id="poemDate"></span> • <span id="poemBy"></span>
+      </div>
+      <h3 class="poem-title" id="poemTitle"></h3>
+      <div id="poem" class="poem"></div>
+      <div class="poem-note" id="poemNote"></div>
+    </section>
+
+    <section class="quote-card">
+      <div id="quote" class="quote"></div>
+    </section>
+
+    <footer class="foot">© <span id="year"></span> For My Princess</footer>
+
+    <!-- Optional: you’ll add your own audio file -->
+    <audio id="bgm" preload="none"></audio>
+  </main>
+
+</body>
+</html>
   <div id="intro" class="intro" aria-hidden="true">
     <div class="intro-inner">
       <div class="heartbeat"></div>
