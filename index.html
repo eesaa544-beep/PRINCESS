@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
@@ -6,40 +6,43 @@
   <title>For My Princess</title>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Merriweather:ital,wght@0,400;0,700;1,400&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="styles.css" />
-  <!-- Load JS safely on Pages -->
+  <!-- IMPORTANT: defer so the DOM exists when JS runs -->
   <script defer src="script.js"></script>
 </head>
 <body>
+  <!-- Glow BG -->
+  <div class="bg"></div>
+
   <!-- PIN GATE -->
   <section id="gate" class="gate">
     <div class="gate-card">
       <h1>For My Princess</h1>
-      <p class="gate-sub">Enter your 6-digit private PIN</p>
+      <p class="gate-sub">Enter your 6‑digit private PIN</p>
 
-      <div id="pinRow" class="pin-row">
-        <input type="password" inputmode="numeric" maxlength="1" />
-        <input type="password" inputmode="numeric" maxlength="1" />
-        <input type="password" inputmode="numeric" maxlength="1" />
-        <input type="password" inputmode="numeric" maxlength="1" />
-        <input type="password" inputmode="numeric" maxlength="1" />
-        <input type="password" inputmode="numeric" maxlength="1" />
+      <div class="pin-row" id="pinRow">
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
+        <input type="password" inputmode="numeric" maxlength="1" class="pin" />
       </div>
 
-      <p class="tip">Tip: it auto-moves. Tap to edit any box.</p>
-      <p id="gateError" class="gate-error" aria-live="polite"></p>
+      <p class="tip">Tip: it auto‑moves. Tap any box to edit.</p>
+      <p class="error" id="pinError" aria-live="polite"></p>
     </div>
   </section>
 
-  <!-- INTRO (heartbeat -> fade) -->
-  <div id="intro" class="intro" aria-hidden="true">
+  <!-- INTRO (heartbeat) -->
+  <section id="intro" class="intro hidden" aria-hidden="true">
     <div class="intro-inner">
       <div class="heartbeat"></div>
+      <div class="intro-title">For My Princess</div>
     </div>
-    <div class="intro-title">For My Princess</div>
-  </div>
+  </section>
 
   <!-- MAIN APP -->
   <main id="app" class="hidden">
@@ -51,18 +54,30 @@
     <section class="timer-card">
       <h2>…and counting</h2>
       <div class="timer-grid">
-        <div class="tbox">
-          <div id="days" class="tnum">--</div>
-          <div class="tlabel">DAYS</div>
-        </div>
-        <div class="tbox">
-          <div id="hours" class="tnum">--</div>
-          <div class="tlabel">HOURS</div>
-        </div>
-        <div class="tbox">
-          <div id="minutes" class="tnum">--</div>
-          <div class="tlabel">MINUTES</div>
-        </div>
+        <div class="tbox"><div class="tnum" id="days">--</div><div class="tlabel">DAYS</div></div>
+        <div class="tbox"><div class="tnum" id="hours">--</div><div class="tlabel">HOURS</div></div>
+        <div class="tbox"><div class="tnum" id="mins">--</div><div class="tlabel">MINUTES</div></div>
+        <div class="tbox"><div class="tnum" id="secs">--</div><div class="tlabel">SECONDS</div></div>
+      </div>
+    </section>
+
+    <section class="poem-card">
+      <div class="meta"><span id="when"></span> • <span id="by">Noor</span></div>
+      <h3>Today’s Poem</h3>
+      <div id="poem" class="poem"></div>
+      <div class="poem-note" id="note"></div>
+    </section>
+
+    <section class="quote-card">
+      <div id="quote" class="quote"></div>
+    </section>
+
+    <footer class="foot">
+      © <span id="year"></span> For My Princess
+    </footer>
+  </main>
+</body>
+</html>        </div>
         <div class="tbox">
           <div id="seconds" class="tnum">--</div>
           <div class="tlabel">SECONDS</div>
