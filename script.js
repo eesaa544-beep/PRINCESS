@@ -1,39 +1,169 @@
 /* ====== CONFIG ====== */
-const CORRECT_PIN = "130206";
-const SINCE = new Date("2024-12-13T00:00:00");
+const START_DATE = new Date('2024-12-13T00:00:00Z');   // Your origin date (UTC)
+const CORRECT_PIN = '130206';                          // your PIN
+const INTRO_MS = 2800;                                  // heartbeat time before fade
+const SHOW_MUSIC_BUTTON = false;                        // left here in case you re-add later
+/* ==================== */
 
-/* ====== UTIL ====== */
-const $ = sel => document.querySelector(sel);
+const qs  = (s, r=document) => r.querySelector(s);
+const qsa = (s, r=document) => [...r.querySelectorAll(s)];
 
-/* ====== PIN GATE ====== */
-function setupPinGate(){
-  const boxes = [...document.querySelectorAll(".pin")];
-  const error = $("#pinError");
+document.addEventListener('DOMContentLoaded', () => {
+  initPinGate();
+  qs('#year').textContent = new Date().getFullYear();
+});
+
+/* ---------- PIN GATE ---------- */
+function initPinGate(){
+  const inputs = qsa('#pinRow input');
+  const row = qs('#pinRow');
+  const err = qs('#gateError');
 
   // focus first
-  boxes[0].focus();
+  inputs[0].focus();
 
-  // move on input
-  boxes.forEach((box, i) => {
-    box.addEventListener("input", e => {
-      e.target.value = e.target.value.replace(/\D/g,"").slice(0,1); // only 1 digit
-      if(e.target.value && i < boxes.length - 1) boxes[i+1].focus();
-      checkIfComplete();
+  // auto-move on type
+  inputs.forEach((inp, idx) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/\D/g, '').slice(0,1);
+      if(inp.value && idx < inputs.length-1) inputs[idx+1].focus();
+      if(getPinValue().length === 6) verifyPin();
     });
 
-    // backspace -> previous
-    box.addEventListener("keydown", e => {
-      if(e.key === "Backspace" && !box.value && i>0){
-        boxes[i-1].focus();
+    // backspace to previous
+    inp.addEventListener('keydown', (e) => {
+      if((e.key === 'Backspace' || e.key === 'Delete') && !inp.value && idx>0){
+        inputs[idx-1].focus();
       }
+      if(e.key === 'Enter' && getPinValue().length === 6) verifyPin();
     });
+  });
 
-    // allow paste 6 digits
-    box.addEventListener("paste", e => {
-      const text = (e.clipboardData || window.clipboardData).getData("text");
-      if(/\d{6}/.test(text)){
-        e.preventDefault();
-        text.slice(0,6).split("").forEach((d, idx)=>{
+  // paste handler
+  row.addEventListener('paste', (e) => {
+    const txt = (e.clipboardData || window.clipboardData).getData('text').replace(/\D/g,'').slice(0,6);
+    if(!txt) return;
+    e.preventDefault();
+    inputs.forEach((inp,i)=> inp.value = txt[i] || '');
+    if(getPinValue().length === 6) verifyPin();
+  });
+
+  function getPinValue(){ return inputs.map(i=>i.value).join(''); }
+
+  function verifyPin(){
+    const val = getPinValue();
+    if(val === CORRECT_PIN){
+      err.textContent = '';
+      // open intro → main
+      startIntro();
+    }else{
+      err.textContent = 'That PIN didn’t match. Try again 💗';
+      qs('.gate-card').classList.remove('shake');
+      // retrigger shake
+      void qs('.gate-card').offsetWidth;
+      qs('.gate-card').classList.add('shake');
+      inputs.forEach(i=>i.value='');
+      inputs[0].focus();
+    }
+  }
+}
+
+/* ---------- INTRO then MAIN ---------- */
+function startIntro(){
+  const intro = qs('#intro');
+  intro.classList.add('show');
+  setTimeout(()=>{
+    intro.classList.remove('show');
+    qs('#gate').style.display = 'none';
+    qs('#app').classList.remove('hidden');
+    initApp();
+  }, INTRO_MS);
+}
+
+/* ---------- MAIN APP ---------- */
+function initApp(){
+  // countdown
+  tick(); setInterval(tick, 1000);
+
+  // daily poem & quote
+  loadDaily();
+}
+
+function tick(){
+  const now = new Date();
+  let diff = Math.max(0, now - START_DATE);
+  const d = Math.floor(diff/(1000*60*60*24)); diff -= d*24*60*60*1000;
+  const h = Math.floor(diff/(1000*60*60));     diff -= h*60*60*1000;
+  const m = Math.floor(diff/(1000*60));        diff -= m*60*1000;
+  const s = Math.floor(diff/1000);
+
+  qs('#days').textContent  = pad(d);
+  qs('#hours').textContent = pad(h);
+  qs('#mins').textContent  = pad(m);
+  qs('#secs').textContent  = pad(s);
+
+  function pad(n){ return String(n).padStart(2,'0'); }
+}
+
+/* Load poems/quotes and display one per day (deterministic, no repeats until cycle) */
+async function loadDaily(){
+  try{
+    const [poems, quotes] = await Promise.all([
+      fetch('poems.json').then(r=>r.json()),
+      fetch('quotes.json').then(r=>r.json())
+    ]);
+
+    const todayKey = formatDateKey(new Date()); // e.g., 2025-08-20
+    // make deterministic indices
+    const pIdx = stableIndex(todayKey + '-poem', poems.length);
+    const qIdx = stableIndex(todayKey + '-quote', quotes.length);
+
+    const p = poems[pIdx];
+    const qt = quotes[qIdx];
+
+    // meta
+    qs('#poemMeta').textContent = p.author ? `${niceDate()} • ${p.author}` : niceDate();
+
+    // animate poem line-by-line
+    renderPoem(p.text);
+
+    // quote
+    qs('#quote').textContent = qt;
+
+  }catch(e){
+    console.error(e);
+    qs('#poem').textContent = 'Poem could not load right now.';
+  }
+}
+
+function renderPoem(text){
+  const box = qs('#poem');
+  box.innerHTML = '';
+  const lines = text.split(/\r?\n/).filter(Boolean);
+  lines.forEach((ln, i) => {
+    const span = document.createElement('div');
+    span.className = 'poem-line';
+    span.style.animationDelay = `${0.45 + i*0.35}s`; // staggered fade/slide
+    // Cormorant + subtle calligraphy feel for emphasis words
+    span.style.fontFamily = i % 3 === 0 ? '"Cormorant Garamond", serif' : 'Inter, sans-serif';
+    span.textContent = ln;
+    box.appendChild(span);
+  });
+}
+
+function formatDateKey(d){
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,'0'), day=String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
+}
+function niceDate(){
+  return new Date().toLocaleString(undefined,{ weekday:'short', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit' });
+}
+function stableIndex(key, mod){
+  // very small, stable hash → 0…mod-1
+  let h=2166136261; // FNV-ish
+  for(let i=0;i<key.length;i++){ h^=key.charCodeAt(i); h = Math.imul(h, 16777619); }
+  return Math.abs(h) % Math.max(1, mod);
+}
           boxes[idx].value = d;
         });
         boxes[5].focus();
