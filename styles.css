@@ -1,39 +1,47 @@
+/* ---------- PIN GATE (hardened) ---------- */
 :root{
-  --bg:#0f0f11;           /* black/graphite */
-  --bg2:#141417;
-  --red:#c92a2a;          /* sleek red */
-  --rose:#7a2d2d;
-  --card:#1b1b20;
-  --muted:#a7a7b0;
-  --text:#f6f6f6;
-  --soft:#ffffff12;
-  --glow: drop-shadow(0 0 24px rgba(201,42,42,.35));
+  --pin-size: 56px;   /* box size on desktop */
+  --pin-gap: 12px;
 }
 
-*{ box-sizing:border-box }
-html,body{ height:100% }
-body{
-  margin:0;
-  color:var(--text);
-  background:
-    radial-gradient(60% 45% at 50% 10%, #240b0b 0%, transparent 65%),
-    radial-gradient(35% 35% at 50% 55%, #1a0b0b 0%, transparent 60%),
-    linear-gradient(135deg, #16161a, #0d0d0f);
-  font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, sans-serif;
-  overflow-x:hidden;
+.pin-row{
+  display: grid;
+  grid-template-columns: repeat(6, var(--pin-size));
+  gap: var(--pin-gap);
+  justify-content: center;
 }
 
-/* PIN gate */
-.gate{
-  position:fixed; inset:0; display:grid; place-items:center;
-  background: radial-gradient(700px 700px at 50% 65%, #2a0f0f 0%, #0000 60%) , var(--bg);
-  padding:24px;
+.pin-row input{
+  /* lock the size no matter what global CSS says */
+  width: var(--pin-size) !important;
+  height: var(--pin-size) !important;
+  flex: 0 0 var(--pin-size) !important;
+
+  padding: 0;
+  text-align: center;
+  font-size: 26px;
+  letter-spacing: 1px;
+
+  border-radius: 12px;
+  border: 1px solid rgba(255,255,255,.15);
+  background: #0f1219;
+  color: var(--text);
+
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: textfield;
+  outline: none;
+  transition: border-color .2s, transform .1s;
 }
-.gate-card{
-  width:min(720px, 92vw);
-  background:linear-gradient(180deg, #1a1a1f 0, #111115 100%);
-  border:1px solid #ffffff12; border-radius:18px;
-  padding:36px 28px 28px; box-shadow: 0 8px 30px #0008;
+
+.pin-row input:focus{
+  border-color: #6e9cff;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 480px){
+  :root{ --pin-size: 46px; --pin-gap: 8px; }
+}
   filter: var(--glow);
 }
 .gate-card h1{
